@@ -2,37 +2,39 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم - أ/ عبدالعزيز الفيفي</title>
+    <title>لوحة تحكم الأستاذ - عبدالعزيز الفيفي</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 40px; background: #f0f0f0; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th { background: #b19410; color: white; padding: 15px; }
-        td { padding: 15px; border-bottom: 1px solid #ddd; text-align: center; }
+        body { font-family: sans-serif; background: #f9f9f9; padding: 30px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #212121; color: #ffc107; padding: 15px; }
+        td { padding: 12px; border: 1px solid #ddd; text-align: center; }
     </style>
 </head>
 <body>
-
-    <h1>📊 نتائج الطلاب - ثانوية الأمير عبدالمجيد</h1>
-    <table>
-        <thead>
-            <tr><th>اسم الطالب</th><th>الدرجة</th><th>التاريخ</th></tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+    <h1>📊 لوحة متابعة الطلاب</h1>
+    <div class="card">
+        <h3>جدول نتائج الاختبار</h3>
+        <table>
+            <thead><tr><th>اسم الطالب</th><th>النتيجة</th><th>التاريخ</th></tr></thead>
+            <tbody id="resultsTable"></tbody>
+        </table>
+    </div>
 
 <script>
-    // استخدم نفس الـ config هنا
-    const firebaseConfig = { /* نفس البيانات التي استخدمتها في صفحة الاختبار */ };
+    const firebaseConfig = { /* انسخ نفس إعدادات Firebase من ملف index.html */ };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    db.collection("student_results").get().then((snapshot) => {
-        const tbody = document.getElementById('tableBody');
+    // جلب البيانات فور تغيرها (Real-time)
+    db.collection("student_results").orderBy("date", "desc").onSnapshot((snapshot) => {
+        const tbody = document.getElementById('resultsTable');
+        tbody.innerHTML = '';
         snapshot.forEach((doc) => {
             const data = doc.data();
-            tbody.innerHTML += `<tr><td>${data.studentName}</td><td>${data.score}</td><td>${data.date}</td></tr>`;
+            tbody.innerHTML += `<tr><td>${data.studentName}</td><td>${data.score} / ${data.total}</td><td>${new Date(data.date).toLocaleDateString('ar-SA')}</td></tr>`;
         });
     });
 </script>
