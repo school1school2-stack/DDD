@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم - أ/ عبدالعزيز الفيفي</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 40px; background: #f0f0f0; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th { background: #b19410; color: white; padding: 15px; }
+        td { padding: 15px; border-bottom: 1px solid #ddd; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <h1>📊 نتائج الطلاب - ثانوية الأمير عبدالمجيد</h1>
+    <table>
+        <thead>
+            <tr><th>اسم الطالب</th><th>الدرجة</th><th>التاريخ</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+<script>
+    // استخدم نفس الـ config هنا
+    const firebaseConfig = { /* نفس البيانات التي استخدمتها في صفحة الاختبار */ };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    db.collection("student_results").get().then((snapshot) => {
+        const tbody = document.getElementById('tableBody');
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            tbody.innerHTML += `<tr><td>${data.studentName}</td><td>${data.score}</td><td>${data.date}</td></tr>`;
+        });
+    });
+</script>
+</body>
+</html>
