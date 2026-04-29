@@ -3,96 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار القدرات اللفظي - ثانوية الأمير عبدالمجيد 🎓</title>
+    <title>تحدي اليوم - أ/ عبدالعزيز الفيفي</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { background: white; padding: 20px; border-radius: 10px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1, h2 { text-align: center; color: #2c3e50; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
-        .option { display: block; width: 100%; text-align: right; padding: 15px; margin: 10px 0; border: 1px solid #eee; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .option:hover { background: #f0f0f0; }
-        .hint-btn { background: #f39c12; margin-bottom: 20px; }
+        :root { --primary: #4a148c; --secondary: #7b1fa2; --bg: #f5f5f5; --accent: #ff9800; --correct: #2e7d32; --wrong: #c62828; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding-top: 20px; }
+        .quiz-container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 650px; text-align: center; position: relative; margin-bottom: 50px; }
+        #timer-bar { position: absolute; top: 0; right: 0; height: 6px; background: var(--accent); width: 100%; transition: width 1s linear; border-radius: 15px 15px 0 0; }
+        .option-btn { display: block; width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; background: none; cursor: pointer; transition: 0.3s; font-size: 1.1rem; font-weight: 500; }
+        .correct-flash { background-color: #e8f5e9 !important; border-color: var(--correct) !important; color: var(--correct); border-width: 3px !important; }
+        .wrong-flash { background-color: #ffeeb2 !important; border-color: var(--wrong) !important; color: var(--wrong); }
         .hidden { display: none; }
-        .stats { font-size: 1.2em; text-align: center; line-height: 1.6; }
+        .reading-text { background: #fff9c4; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: right; font-size: 1rem; border-right: 5px solid var(--accent); line-height: 1.6; }
+        input[type="text"] { width: 85%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 2px solid #ddd; font-size: 1rem; text-align: center; }
+        .btn-start { background: var(--primary); color: white; padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; }
+        #feedback { margin-top: 15px; font-weight: bold; font-size: 1.1rem; min-height: 1.5em; }
+        #timer-text { font-weight: bold; color: var(--accent); margin-bottom: 10px; }
+        .copyright { font-size: 0.85rem; color: #666; margin-top: 25px; border-top: 1px solid #eee; padding-top: 10px; }
+        .normal-text { color: #000; font-weight: normal; font-size: 0.85rem; }
+        .date-red-small { color: #e53e3e; font-size: 0.85rem; font-weight: bold; margin: 10px 0; display: inline-block; }
+        
+        /* تنسيق جدول النتائج */
+        .summary-table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 0.9rem; text-align: right; }
+        .summary-table th, .summary-table td { padding: 10px; border-bottom: 1px solid #ddd; }
+        .status-true { color: #2e7d32; font-weight: bold; }
+        .status-false { color: #c62828; font-weight: bold; }
     </style>
 </head>
-<body>
+<body onload="updateDateTime()">
 
-<div class="container" id="login-screen">
-    <h1>ثانوية الأمير عبدالمجيد 🎓</h1>
-    <input type="text" id="name1" placeholder="الاسم الأول">
-    <input type="text" id="name2" placeholder="الاسم الأب">
-    <input type="text" id="name3" placeholder="اسم العائلة">
-    <input type="text" id="class-name" placeholder="الفصل">
-    <button onclick="startQuiz()">بدء الاختبار</button>
-</div>
+<div class="quiz-container">
+    <div id="timer-bar"></div>
+    
+    <div id="login-section">
+        <h2 style="color: var(--primary);">( تحدي اليوم )</h2>
+        <div id="date-display" class="date-red-small">جاري تحميل التاريخ...</div>
+        <div class="copyright">أ/ <span class="normal-text">عبدالعزيز الفيفي</span> - <span class="normal-text">ثانوية الأمير عبدالمجيد 🎓</span></div>
+        <input type="text" id="student-name" placeholder="أدخل اسمك الثلاثي لتبدأ...">
+        <br>
+        <button class="btn-start" onclick="startQuiz()">بدأ الاختبار</button>
+    </div>
 
-<div class="container hidden" id="quiz-screen">
-    <div id="question-area"></div>
-    <button class="hint-btn" onclick="showHint()">تلميح (علاقة منطقية)</button>
-    <div id="hint-area" style="display:none; color: #e67e22; margin-bottom: 10px;"></div>
-</div>
+    <div id="quiz-section" class="hidden">
+        <div id="timer-text">الوقت المتبقي: 40</div>
+        <h3 id="question-title" style="color: var(--secondary); margin-bottom: 5px;"></h3>
+        <div id="reading-container" class="reading-text hidden"></div>
+        <h2 id="question-text" style="margin-top: 5px;"></h2>
+        <div id="options-container"></div>
+        <div id="feedback"></div>
+        <div class="copyright"> أ/ <span class="normal-text">عبدالعزيز الفيفي</span> - <span class="normal-text">ثانوية الأمير عبدالمجيد 🎓</span></div>
+    </div>
 
-<div class="container hidden" id="result-screen">
-    <h2>نتائج الاختبار</h2>
-    <div id="results" class="stats"></div>
-    <button onclick="location.reload()">إعادة الاختبار</button>
+    <div id="result-section" class="hidden">
+        <h2>تم اكتمال الاختبار بنجاح</h2>
+        <h1 id="final-score" style="color: var(--primary);"></h1>
+        
+        <div id="summary-container" style="text-align: right; margin-top: 20px;"></div>
+
+        <button class="btn-start" onclick="location.reload()" style="background: linear-gradient(45deg, #ff512f, #dd2476); margin-top: 30px;">
+            أعد الكرة الآن 🚀 أو كُن النسخة الأفضل غداً 🔥✨
+        </button>
+    </div>
 </div>
 
 <script>
-    // قم بإضافة الأسئلة الـ 46 هنا بنفس التنسيق
-    const questions = [
-        { q: "سماء : نجوم", options: ["بحر : أسماك", "أرض : جبال", "غابة : أشجار", "ليل : قمر"], answer: "بحر : أسماك", hint: "العلاقة: مكان واحتواء، السماء تحتوي على نجوم كما يحتوي البحر على أسماك." },
-        { q: "سيف : قاطع", options: ["سكين : حاد", "نار : محرقة", "كتاب : مفيد", "شمس : ضوء"], answer: "نار : محرقة", hint: "العلاقة: صفة ملازمة، السيف من صفاته القطع، والنار من صفاتها الإحراق." }
-        // يمكنك إضافة بقية الأسئلة هنا..
+    function updateDateTime() {
+        const today = new Date();
+        const hijriOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', calendar: 'islamic-umalqura', numberingSystem: 'arabic' };
+        const gregOptions = { day: 'numeric', month: 'long', year: 'numeric', numberingSystem: 'arabic' };
+        document.getElementById('date-display').innerText = `${new Intl.DateTimeFormat('ar-SA', hijriOptions).format(today)} | ${new Intl.DateTimeFormat('ar-SA', gregOptions).format(today)} م`;
+    }
+
+    let timeLeft = 40, timerInterval, currentQ = 0, score = 0;
+    let userResponses = []; // مصفوفة لتخزين إجابات الطالب
+    const TRANSITION_DELAY = 2000; // تقليل التأخير قليلاً لسرعة التصفح
+    const rawData = [
+        { type: "التناظر اللفظي", q: "مستشفى : أطباء", options: ["مدرسة : معلمون", "طريق : سيارات", "سوق : بضائع", "منزل : أثاث"], correctText: "مدرسة : معلمون" },
+        { type: "التناظر اللفظي", q: "وزن : ميزان", options: ["وقت : ساعة", "حرارة : مقياس", "مسافة : متر", "ضغط : بارومتر"], correctText: "وقت : ساعة" },
+        // ... (أضف بقية أسئلتك هنا)
     ];
 
-    let currentQ = 0, score = 0, studentName = "", studentClass = "";
-    let userAnswers = [];
+    let quizData = [];
+    function shuffle(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
 
     function startQuiz() {
-        const n1 = document.getElementById('name1').value;
-        const n2 = document.getElementById('name2').value;
-        const n3 = document.getElementById('name3').value;
-        const cls = document.getElementById('class-name').value;
-        if(!n1 || !n2 || !n3 || !cls) return alert("الرجاء تعبئة جميع الحقول");
-        studentName = `${n1} ${n2} ${n3}`;
-        studentClass = cls;
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
+        if (!document.getElementById('student-name').value) { alert("لطفاً، ادخل اسمك أولاً"); return; }
+        quizData = shuffle([...rawData]);
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
         showQuestion();
     }
 
     function showQuestion() {
-        if(currentQ >= questions.length) return showResults();
-        const q = questions[currentQ];
-        let html = `<h3>${q.q}</h3>`;
-        q.options.forEach(opt => {
-            html += `<button class="option" onclick="checkAnswer('${opt}')">${opt}</button>`;
+        const q = quizData[currentQ];
+        const shuffledOptions = shuffle([...q.options]);
+        document.getElementById('question-title').innerText = `س ${currentQ + 1} في ( ${q.type} )`;
+        const readingBox = document.getElementById('reading-container');
+        if (q.text) { readingBox.innerText = q.text; readingBox.classList.remove('hidden'); } else { readingBox.classList.add('hidden'); }
+        document.getElementById('question-text').innerText = q.q;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        document.getElementById('feedback').innerText = '';
+        shuffledOptions.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.id = `opt-${index}`;
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(opt, opt === q.correctText, q.correctText);
+            container.appendChild(btn);
         });
-        document.getElementById('question-area').innerHTML = html;
-        document.getElementById('hint-area').style.display = 'none';
+        startTimer();
     }
 
-    function checkAnswer(ans) {
-        if(ans === questions[currentQ].answer) score++;
-        userAnswers.push({q: questions[currentQ].q, correct: ans === questions[currentQ].answer, userAns: ans});
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 40;
+        document.getElementById('timer-text').innerText = `الوقت المتبقي: ${timeLeft}`;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer-text').innerText = `الوقت المتبقي: ${timeLeft}`;
+            document.getElementById('timer-bar').style.width = `${(timeLeft / 40) * 100}%`;
+            if (timeLeft <= 0) { clearInterval(timerInterval); showCorrectAndNext(null); }
+        }, 1000);
+    }
+
+    function checkAnswer(selectedAns, isCorrect, correctText) {
+        clearInterval(timerInterval);
+        disableOptions();
+        
+        // حفظ الإجابة للملخص
+        userResponses.push({ question: quizData[currentQ].q, selected: selectedAns, correct: correctText, status: isCorrect });
+
+        if (isCorrect) {
+            score++;
+            document.getElementById('feedback').innerHTML = "<span style='color:green'>إجابة صحيحة! 🌟</span>";
+            confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
+        } else {
+            document.getElementById('feedback').innerHTML = "<span style='color:red'>خطأ! الصواب بالأخضر.. 💪</span>";
+            highlightCorrect(correctText);
+        }
+        setTimeout(nextQuestion, TRANSITION_DELAY);
+    }
+
+    function showCorrectAndNext(selectedAns) {
+        if(selectedAns === null) {
+             userResponses.push({ question: quizData[currentQ].q, selected: "لم تُجب", correct: quizData[currentQ].correctText, status: false });
+        }
+        highlightCorrect(quizData[currentQ].correctText);
+        disableOptions();
+        setTimeout(nextQuestion, TRANSITION_DELAY);
+    }
+
+    function highlightCorrect(correctText) {
+        document.querySelectorAll('.option-btn').forEach(btn => { if (btn.innerText === correctText) btn.classList.add('correct-flash'); });
+    }
+
+    function disableOptions() { document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true); }
+
+    function nextQuestion() {
         currentQ++;
-        showQuestion();
+        if (currentQ < quizData.length) { showQuestion(); } else { finishQuiz(); }
     }
 
-    function showHint() {
-        document.getElementById('hint-area').innerText = questions[currentQ].hint;
-        document.getElementById('hint-area').style.display = 'block';
-    }
-
-    function showResults() {
-        document.getElementById('quiz-screen').classList.add('hidden');
-        document.getElementById('result-screen').classList.remove('hidden');
-        let resHtml = `الطالب: ${studentName}<br>الفصل: ${studentClass}<br><br>النتيجة: ${score} من ${questions.length}<br>`;
-        resHtml += `النسبة: ${((score/questions.length)*100).toFixed(1)}%`;
-        document.getElementById('results').innerHTML = resHtml;
+    function finishQuiz() {
+        document.getElementById('quiz-section').classList.add('hidden');
+        document.getElementById('result-section').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `درجتك هي: ${score} من ${quizData.length}`;
+        
+        // بناء جدول الملخص
+        let tableHtml = `<h3>ملخص إجاباتك:</h3><table class="summary-table"><tr><th>السؤال</th><th>إجابتك</th><th>الصواب</th></tr>`;
+        userResponses.forEach(r => {
+            tableHtml += `<tr>
+                <td>${r.question}</td>
+                <td class="${r.status ? 'status-true' : 'status-false'}">${r.selected}</td>
+                <td class="status-true">${r.correct}</td>
+            </tr>`;
+        });
+        tableHtml += `</table>`;
+        document.getElementById('summary-container').innerHTML = tableHtml;
     }
 </script>
 </body>
