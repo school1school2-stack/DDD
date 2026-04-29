@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار القدرات اللفظي - ثانوية الأمير عبدالمجيد 🎓</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { background: white; padding: 20px; border-radius: 10px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; color: #2c3e50; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        .option { display: block; width: 100%; text-align: right; padding: 15px; margin: 10px 0; border: 1px solid #eee; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .option:hover { background: #f0f0f0; }
+        .hint-btn { background: #f39c12; margin-bottom: 20px; }
+        .hidden { display: none; }
+        .stats { font-size: 1.2em; text-align: center; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="login-screen">
+    <h1>ثانوية الأمير عبدالمجيد 🎓</h1>
+    <input type="text" id="name1" placeholder="الاسم الأول">
+    <input type="text" id="name2" placeholder="الاسم الأب">
+    <input type="text" id="name3" placeholder="اسم العائلة">
+    <input type="text" id="class-name" placeholder="الفصل">
+    <button onclick="startQuiz()">بدء الاختبار</button>
+</div>
+
+<div class="container hidden" id="quiz-screen">
+    <div id="question-area"></div>
+    <button class="hint-btn" onclick="showHint()">تلميح (علاقة منطقية)</button>
+    <div id="hint-area" style="display:none; color: #e67e22; margin-bottom: 10px;"></div>
+</div>
+
+<div class="container hidden" id="result-screen">
+    <h2>نتائج الاختبار</h2>
+    <div id="results" class="stats"></div>
+    <button onclick="location.reload()">إعادة الاختبار</button>
+</div>
+
+<script>
+    // قم بإضافة الأسئلة الـ 46 هنا بنفس التنسيق
+    const questions = [
+        { q: "سماء : نجوم", options: ["بحر : أسماك", "أرض : جبال", "غابة : أشجار", "ليل : قمر"], answer: "بحر : أسماك", hint: "العلاقة: مكان واحتواء، السماء تحتوي على نجوم كما يحتوي البحر على أسماك." },
+        { q: "سيف : قاطع", options: ["سكين : حاد", "نار : محرقة", "كتاب : مفيد", "شمس : ضوء"], answer: "نار : محرقة", hint: "العلاقة: صفة ملازمة، السيف من صفاته القطع، والنار من صفاتها الإحراق." }
+        // يمكنك إضافة بقية الأسئلة هنا..
+    ];
+
+    let currentQ = 0, score = 0, studentName = "", studentClass = "";
+    let userAnswers = [];
+
+    function startQuiz() {
+        const n1 = document.getElementById('name1').value;
+        const n2 = document.getElementById('name2').value;
+        const n3 = document.getElementById('name3').value;
+        const cls = document.getElementById('class-name').value;
+        if(!n1 || !n2 || !n3 || !cls) return alert("الرجاء تعبئة جميع الحقول");
+        studentName = `${n1} ${n2} ${n3}`;
+        studentClass = cls;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if(currentQ >= questions.length) return showResults();
+        const q = questions[currentQ];
+        let html = `<h3>${q.q}</h3>`;
+        q.options.forEach(opt => {
+            html += `<button class="option" onclick="checkAnswer('${opt}')">${opt}</button>`;
+        });
+        document.getElementById('question-area').innerHTML = html;
+        document.getElementById('hint-area').style.display = 'none';
+    }
+
+    function checkAnswer(ans) {
+        if(ans === questions[currentQ].answer) score++;
+        userAnswers.push({q: questions[currentQ].q, correct: ans === questions[currentQ].answer, userAns: ans});
+        currentQ++;
+        showQuestion();
+    }
+
+    function showHint() {
+        document.getElementById('hint-area').innerText = questions[currentQ].hint;
+        document.getElementById('hint-area').style.display = 'block';
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        let resHtml = `الطالب: ${studentName}<br>الفصل: ${studentClass}<br><br>النتيجة: ${score} من ${questions.length}<br>`;
+        resHtml += `النسبة: ${((score/questions.length)*100).toFixed(1)}%`;
+        document.getElementById('results').innerHTML = resHtml;
+    }
+</script>
+</body>
+</html>
